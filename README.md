@@ -2,6 +2,9 @@
 
 Install on server:
 ```
+ulimit -n 200000
+```
+```
 git clone https://github.com/aiditz/centrifugo-ws-nats-test.git
 cd centrifugo-ws-nats-test
 docker compose build && docker compose up -d
