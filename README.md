@@ -1,4 +1,4 @@
-$ Installation
+## Installation
 
 Install on server:
 ```
@@ -9,7 +9,7 @@ docker compose build && docker compose up -d
 
 Run load client (windows): `./run_win.bat` (edit it to set env vars)
 
-# Set up Grafana
+## Set up Grafana
 1. http://localhost:3000 (admin/admin)
 1. Connections → Data Sources → Add data source
 1. Select "Prometheus"
