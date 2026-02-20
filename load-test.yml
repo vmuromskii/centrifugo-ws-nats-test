@@ -1,0 +1,14 @@
+cd C:\loadtest
+
+# Скачать зависимости
+go mod tidy
+
+# Задать переменные и запустить
+$env:CENTRIFUGO_WS_URL = "ws://192.168.1.80:8021/connection/websocket"
+$env:CENTRIFUGO_TOKEN_SECRET = "token-secret-key"
+$env:NUM_CLIENTS = "5000"
+$env:MESSAGE_INTERVAL = "1s"
+$env:MESSAGE_SIZE = "100"
+$env:RAMP_UP_DELAY = "2ms"
+go run main.go
+

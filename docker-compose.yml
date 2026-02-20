@@ -1,0 +1,121 @@
+version: "3.8"
+
+services:
+  nats:
+    image: nats:2.10-alpine
+    ports:
+      - "4223:4222"
+      - "8223:8222"
+    command: >
+      -js
+      -m 8222
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    networks:
+      - centrifugo-net
+
+  centrifugo:
+    image: centrifugo/centrifugo:v5
+    ports:
+      - "8021:8000"
+    volumes:
+      - ./centrifugo/config.json:/centrifugo/config.json:ro
+    command: centrifugo -c config.json
+    depends_on:
+      - nats
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+    networks:
+      - centrifugo-net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    depends_on:
+      - nats
+      - centrifugo
+    environment:
+      NATS_URL: "nats://nats:4222"
+      CENTRIFUGO_API_URL: "http://centrifugo:8000/api"
+      CENTRIFUGO_API_KEY: "api-secret-key"
+      CENTRIFUGO_TOKEN_SECRET: "token-secret-key"
+    networks:
+      - centrifugo-net
+
+  prometheus:
+    image: prom/prometheus:v2.50.0
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    networks:
+      - centrifugo-net
+
+  grafana:
+    image: grafana/grafana:10.3.1
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+    depends_on:
+      - prometheus
+    networks:
+      - centrifugo-net
+      
+  ws-proxy:
+    build:
+      context: ./ws-proxy
+      dockerfile: Dockerfile
+    ports:
+      - "8010:8000"
+      - "8011:8001"
+    environment:
+      NATS_URL: "nats://nats:4222"
+      LISTEN_ADDR: ":8000"
+      METRICS_ADDR: ":8001"
+      NATS_PREFIX: "centrifugo"
+    depends_on:
+      - nats
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+    networks:
+      - centrifugo-net
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    ports:
+      - "8030:8080"
+    depends_on:
+      - centrifugo
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    networks:
+      - centrifugo-net
+
+networks:
+  centrifugo-net:
+    driver: bridge

@@ -1,0 +1,28 @@
+{
+  "token_hmac_secret_key": "token-secret-key",
+  "api_key": "api-secret-key",
+  "admin": true,
+  "admin_password": "admin",
+  "admin_secret": "admin-secret",
+  "log_level": "info",
+  "allowed_origins": ["*"],
+
+  "proxy_connect_endpoint": "http://backend:8080/centrifugo/connect",
+  "proxy_subscribe_endpoint": "http://backend:8080/centrifugo/subscribe",
+  "proxy_publish_endpoint": "http://backend:8080/centrifugo/publish",
+
+  "publish": true,
+  "allow_publish_for_client": true,
+  "allow_subscribe_for_client": true,
+
+  "broker": "nats",
+  "nats_url": "nats://nats:4222",
+  "nats_raw_mode": true,
+  "nats_prefix": "centrifugo",
+
+  "prometheus": true,
+  "health": true,
+  "client_channel_limit": 10,
+  "channel_max_length": 255,
+  "gomaxprocs": 0
+}
